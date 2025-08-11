@@ -18,12 +18,12 @@ jobs:
               core.setFailed('Required secrets are unset!');
           }
     - name: "Checkout rsdk"
-      uses: "actions/checkout@v4"
+      uses: "actions/checkout@v5"
       with:
         ref: "1ad0c20d99ba14f937103d4cfbe0523e0f1480ac"
         repository: "RadxaOS-SDK/rsdk"
     - name: "Checkout current repo"
-      uses: "actions/checkout@v4"
+      uses: "actions/checkout@v5"
       with:
         path: ".infra-repo"
         token: "${{secrets.GIT_PUSH_TOKEN}}"
