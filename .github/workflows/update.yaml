@@ -10,23 +10,25 @@ jobs:
     - env:
         SECRETS: "${{ toJSON(secrets) }}"
       name: "Secret tests"
-      uses: "actions/github-script@v8"
+      uses: "actions/github-script@v9"
       with:
         script: |
           const secrets = JSON.parse(process.env.SECRETS);
-          if (secrets.GPG_KEY === undefined || secrets.RADXA_APT_KEY_2024 === undefined) {
+          if (secrets.RADXA_APT_KEY_2024 === undefined ||
+              secrets.GPG_KEY === undefined ||
+              secrets.RADXA_APT_KEY_2026 === undefined) {
               core.setFailed('Required secrets are unset!');
           }
     - name: "Checkout rsdk"
-      uses: "actions/checkout@v5"
+      uses: "actions/checkout@v7"
       with:
-        ref: "3a67b52dc45d0c00761eabf6bcf9f465e9662da1"
+        ref: "299ac31e00c4ceba06b97217980cc74cac90396e"
         repository: "RadxaOS-SDK/rsdk"
     - name: "Checkout current repo"
-      uses: "actions/checkout@v5"
+      uses: "actions/checkout@v7"
       with:
         path: ".infra-repo"
-        token: "${{secrets.GIT_PUSH_TOKEN}}"
+        token: "${{secrets.CODE_WRITE_TOKEN}}"
     - env:
         GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       id: "build"
@@ -38,6 +40,9 @@ jobs:
             mv pkgs.lock.new pkgs.lock
             git add pkgs.lock
         fi
+        
+        # Clean up wget file in case it failed (for example no lock in test repo)
+        rm -f pkgs.lock.new
         
         ../src/bin/rsdk infra-pkg-snapshot
         git add pkgs.json
@@ -56,6 +61,7 @@ jobs:
         git push
         popd
       shell: "bash"
+    timeout-minutes: 10
 name: "Update package version info"
 "on":
   pull_request:
